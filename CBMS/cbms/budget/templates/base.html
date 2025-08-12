@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CBMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .navbar {
+            background: rgba(34, 34, 34, 0.95);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.8rem;
+            transition: color 0.3s ease;
+        }
+        
+        .navbar-brand:hover {
+            color: #667eea;
+        }
+        
+        .navbar-nav {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-item {
+            margin: 0;
+        }
+        
+        .nav-link {
+            color: #fff;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .nav-link:hover, .nav-link:focus {
+            background: rgba(102, 126, 234, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        
+        .base-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            min-height: calc(100vh - 200px);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+                flex-wrap: wrap;
+            }
+            
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .navbar-nav {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                margin-top: 1rem;
+                gap: 0.25rem;
+            }
+            
+            .navbar-nav.active {
+                display: flex;
+            }
+            
+            .nav-item {
+                width: 100%;
+            }
+            
+            .nav-link {
+                display: block;
+                text-align: center;
+                padding: 1rem;
+                border-radius: 8px;
+                margin: 0.25rem 0;
+            }
+            
+            .base-container {
+                margin: 1rem;
+                padding: 1.5rem;
+                border-radius: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.75rem;
+            }
+            
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+            
+            .base-container {
+                margin: 0.5rem;
+                padding: 1rem;
+                border-radius: 10px;
+            }
+        }
+        
+        /* Animation for mobile menu */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .navbar-nav.active {
+            animation: slideDown 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a class="navbar-brand" href="{% url 'root' %}">CBMS</a>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        <ul class="navbar-nav" id="navbarNav">
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">🏠 Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_people' %}">👥 Manage People</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_expense' %}">💸 Add Expense</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'add_income' %}">💰 Revenue</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'account_analysis' %}">📊 Analysis</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">🚪 Logout</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">🔑 Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'signup' %}">📝 Sign Up</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    <div class="base-container">
+        {% block content %}
+        {% endblock %}
+    </div>
+    
+    <script>
+        function toggleMobileMenu() {
+            const navbarNav = document.getElementById('navbarNav');
+            navbarNav.classList.toggle('active');
+        }
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const navbar = document.querySelector('.navbar');
+            const navbarNav = document.getElementById('navbarNav');
+            const mobileBtn = document.querySelector('.mobile-menu-btn');
+            
+            if (!navbar.contains(event.target) && navbarNav.classList.contains('active')) {
+                navbarNav.classList.remove('active');
+            }
+        });
+        
+        // Close mobile menu when window is resized to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.getElementById('navbarNav').classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .analysis-container {
+        padding: 1rem;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .month-selector-section {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .download-section {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+    
+    .download-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .download-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+    
+    .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    .download-btn.secondary {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    }
+    
+    .download-btn.secondary:hover {
+        box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+    }
+    
+    .download-btn.danger {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    }
+    
+    .download-btn.danger:hover {
+        box-shadow: 0 10px 25px rgba(244, 67, 54, 0.3);
+    }
+    
+    @keyframes fadeInUp {
+        from { 
+            opacity: 0; 
+            transform: translateY(30px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+    
+    .month-selector {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .month-label {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.1rem;
+        white-space: nowrap;
+    }
+    
+    .month-select {
+        flex: 1;
+        min-width: 200px;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        cursor: pointer;
+    }
+    
+    .month-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .summary-card {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.2);
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    }
+    
+    .summary-card h4 {
+        margin: 0 0 1rem 0;
+        font-size: 1.1rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .summary-card .amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .income-card .amount {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .expense-card .amount {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .balance-card .amount {
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .analysis-section {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        color: #333;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .analysis-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .analysis-table th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .analysis-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.95rem;
+    }
+    
+   .analysis-table tbody tr:hover:not(.total-row) {
+    background: rgba(102, 126, 234, 0.05);
+}
+    
+    .total-row {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+    }
+    
+    .total-row td {
+        color: white;
+        font-weight: 600;
+    }
+ 
+    
+    
+    .empty-message {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #666;
+        font-size: 1.1rem;
+        font-style: italic;
+    }
+    
+    .placeholder-message {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+        font-size: 1.2rem;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 2px dashed #667eea;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .placeholder-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .analysis-container {
+            padding: 0.5rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .month-selector-section, .analysis-section {
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+        
+        .month-selector {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .month-select {
+            min-width: auto;
+        }
+        
+        .summary-cards {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .summary-card {
+            padding: 1.5rem;
+        }
+        
+        .summary-card .amount {
+            font-size: 2rem;
+        }
+        
+        .analysis-table th,
+        .analysis-table td {
+            padding: 0.75rem 0.5rem;
+            font-size: 0.9rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .page-title {
+            font-size: 1.75rem;
+        }
+        
+        .month-selector-section, .analysis-section {
+            padding: 1rem;
+            border-radius: 12px;
+        }
+        
+        .summary-card {
+            padding: 1.25rem;
+        }
+        
+        .summary-card .amount {
+            font-size: 1.75rem;
+        }
+        
+        .analysis-table th,
+        .analysis-table td {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.85rem;
+        }
+        
+        .placeholder-message {
+            padding: 2rem 1rem;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="analysis-container">
+    <div class="page-header">
+        <h1 class="page-title">📊 Account Analysis</h1>
+        <p class="page-subtitle">Analyze your financial data by month</p>
+    </div>
+    
+    <div class="month-selector-section">
+        <form method="get">
+            <div class="month-selector">
+                <label for="month" class="month-label">Select Month:</label>
+                <select name="month" id="month" class="month-select" onchange="this.form.submit()">
+                    {% for m in months %}
+                        <option value="{{ m.value }}" {% if m.value == selected_month %}selected{% endif %}>
+                            {{ m.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    {% if selected_month %}
+    <!-- Download Reports Section -->
+    <div class="download-section">
+        <h3 class="section-title">📊 Download Reports</h3>
+        <p style="color: #666; margin-bottom: 1rem;">Generate and download detailed financial reports for {{ selected_month_label }}</p>
+        
+        <div class="download-grid">
+            <a href="{% url 'download_csv' %}?month={{ selected_month }}&type=all" class="download-btn">
+                📄 Complete Report (CSV)
+            </a>
+            <a href="{% url 'download_csv' %}?month={{ selected_month }}&type=expenses" class="download-btn secondary">
+                💸 Expenses Only (CSV)
+            </a>
+            <a href="{% url 'download_csv' %}?month={{ selected_month }}&type=income" class="download-btn secondary">
+                💰 Income Only (CSV)
+            </a>
+            <a href="{% url 'balance_sheet' %}?month={{ selected_month }}" class="download-btn danger">
+                📋 Balance Sheet
+            </a>
+            <a href="{% url 'profit_loss_summary' %}?month={{ selected_month }}" class="download-btn danger">
+                📈 Profit/Loss Summary
+            </a>
+        </div>
+    </div>
+
+        <div class="summary-cards">
+            <div class="summary-card income-card">
+                <h4>💰 Total Income</h4>
+                <p class="amount">₹{{ total_income|default:"0"|floatformat:2 }}</p>
+            </div>
+            <div class="summary-card expense-card">
+                <h4>💸 Total Expense</h4>
+                <p class="amount">₹{{ total_expense|default:"0"|floatformat:2 }}</p>
+            </div>
+            <div class="summary-card balance-card">
+                <h4>🏦 Net Balance</h4>
+                <p class="amount">₹{{ net_balance|default:"0"|floatformat:2 }}</p>
+            </div>
+        </div>
+
+        <div class="analysis-section">
+            <h3 class="section-title">💸 Expenses for {{ selected_month_label }}</h3>
+            <div class="table-container">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>Person Name</th>
+                            <th>Category</th>
+                            <th>Vendor</th>
+                            <th>Payment Method</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.person.name }}</td>
+                            <td>
+                                {% if expense.category in "marketing,salaries,utilities,rent,equipment,travel,food,other" %}
+                                    {{ expense.get_category_display }}
+                                {% else %}
+                                    {{ expense.category|title }}
+                                {% endif %}
+                            </td>
+                            <td>{{ expense.vendor|default:"-" }}</td>
+                            <td>
+                                {% if expense.payment_method in "cash,card,bank_transfer,check,digital_wallet,other" %}
+                                    {{ expense.get_payment_method_display }}
+                                {% else %}
+                                    {{ expense.payment_method|title }}
+                                {% endif %}
+                            </td>
+                            <td>{{ expense.date }}</td>
+                            <td>
+                                <a href="{% url 'expense_detail' expense.id %}" style="color: #667eea; text-decoration: none; font-weight: 600;">
+                                    ₹{{ expense.amount|floatformat:2 }}
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty-message">No expenses for this month.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="5" style="text-align:right;">Total Expense:</td>
+                            <td>₹{{ total_expense|default:"0"|floatformat:2 }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="analysis-section">
+            <h3 class="section-title">💰 Income for {{ selected_month_label }}</h3>
+            <div class="table-container">
+                <table class="analysis-table">
+                    <thead>
+                        <tr>
+                            <th>Source Name</th>
+                            <th>Given By</th>
+                            <th>Category</th>
+                            <th>Payment Method</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for income in incomes %}
+                        <tr>
+                            <td>{{ income.source_name }}</td>
+                            <td>{{ income.person }}</td>
+                            <td>{{ income.category|default:"-" }}</td>
+                            <td>
+                                {% if income.payment_method in "cash,card,bank_transfer,check,digital_wallet,other" %}
+                                    {{ income.get_payment_method_display }}
+                                {% else %}
+                                    {{ income.payment_method|title }}
+                                {% endif %}
+                            </td>
+                            <td>{{ income.date }}</td>
+                            <td>₹{{ income.amount|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty-message">No income for this month.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="5" style="text-align:right;">Total Income:</td>
+                            <td>₹{{ total_income|default:"0"|floatformat:2 }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="placeholder-message">
+            <div class="placeholder-icon">📊</div>
+            <p>Please select a month to view account analysis.</p>
+        </div>
+    {% endif %}
+
+    <div class="card p-4 shadow">
+    <!-- <h2>Financial Prediction</h2>
+    <p><strong>Predicted Expense (next month):</strong> ₹{{ predicted_expense }}</p>
+    <p><strong>Predicted Income (next month):</strong> ₹{{ predicted_income }}</p>
+    <p><strong>Required Income (150× expense):</strong> ₹{{ required_income }}</p>
+    </div> -->
+
+</div>
+{% endblock %}

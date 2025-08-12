@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .balance-sheet-container {
+        padding: 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .balance-sheet-card {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        animation: fadeInUp 0.8s ease-out;
+        margin-bottom: 2rem;
+    }
+    
+    @keyframes fadeInUp {
+        from { 
+            opacity: 0; 
+            transform: translateY(30px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+    
+    .balance-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .balance-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .balance-period {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .balance-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .summary-item {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        border-left: 4px solid #667eea;
+    }
+    
+    .summary-label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+    }
+    
+    .summary-value.positive {
+        color: #4CAF50;
+    }
+    
+    .summary-value.negative {
+        color: #f44336;
+    }
+    
+    .breakdown-section {
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .breakdown-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .breakdown-card {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border-left: 4px solid #4CAF50;
+    }
+    
+    .breakdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .breakdown-item:last-child {
+        border-bottom: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #333;
+    }
+    
+    .breakdown-label {
+        color: #666;
+    }
+    
+    .breakdown-value {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .transactions-section {
+        margin-bottom: 2rem;
+    }
+    
+    .transactions-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .transactions-table th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    .transactions-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .transactions-table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .back-button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+    
+    .back-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .balance-sheet-container {
+            padding: 0.5rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .balance-sheet-card {
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+        
+        .balance-title {
+            font-size: 1.5rem;
+        }
+        
+        .breakdown-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .transactions-table {
+            font-size: 0.9rem;
+        }
+        
+        .transactions-table th,
+        .transactions-table td {
+            padding: 0.75rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .page-title {
+            font-size: 1.75rem;
+        }
+        
+        .balance-sheet-card {
+            padding: 1rem;
+            border-radius: 12px;
+        }
+        
+        .balance-title {
+            font-size: 1.25rem;
+        }
+    }
+</style>
+
+<div class="balance-sheet-container">
+    <div class="page-header">
+        <h1 class="page-title">📋 Balance Sheet</h1>
+        <p class="page-subtitle">Comprehensive financial overview for {{ selected_month }}</p>
+    </div>
+    
+    <div class="balance-sheet-card">
+        <div class="balance-header">
+            <h2 class="balance-title">Balance Sheet</h2>
+            <p class="balance-period">{{ selected_month }}</p>
+        </div>
+        
+        <!-- Financial Summary -->
+        <div class="balance-summary">
+            <div class="summary-item">
+                <div class="summary-label">Total Income</div>
+                <div class="summary-value positive">₹{{ total_income|floatformat:2 }}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Total Expenses</div>
+                <div class="summary-value negative">₹{{ total_expenses|floatformat:2 }}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Net Balance</div>
+                <div class="summary-value {% if net_balance >= 0 %}positive{% else %}negative{% endif %}">
+                    ₹{{ net_balance|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Expense Breakdown by Category -->
+        <div class="breakdown-section">
+            <h3 class="section-title">🏷️ Expense Breakdown by Category</h3>
+            <div class="breakdown-grid">
+                <div class="breakdown-card">
+                    {% for category in category_expenses %}
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">{{ category.category_display }}</span>
+                        <span class="breakdown-value">₹{{ category.total|floatformat:2 }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">No expenses recorded</span>
+                        <span class="breakdown-value">₹0.00</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Method Breakdown -->
+        <div class="breakdown-section">
+            <h3 class="section-title">💳 Payment Method Breakdown</h3>
+            <div class="breakdown-grid">
+                <div class="breakdown-card">
+                    {% for payment in payment_method_expenses %}
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">{{ payment.payment_display }}</span>
+                        <span class="breakdown-value">₹{{ payment.total|floatformat:2 }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">No payment data</span>
+                        <span class="breakdown-value">₹0.00</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Transactions -->
+        <div class="transactions-section">
+            <h3 class="section-title">💸 Recent Expenses</h3>
+            <div class="table-container">
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Person</th>
+                            <th>Category</th>
+                            <th>Vendor</th>
+                            <th>Payment Method</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.date|date:"M d, Y" }}</td>
+                            <td>{{ expense.person.name }}</td>
+                            <td>{{ expense.get_category_display }}</td>
+                            <td>{{ expense.vendor|default:"-" }}</td>
+                            <td>{{ expense.get_payment_method_display }}</td>
+                            <td>₹{{ expense.amount|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: #666;">No expenses for this month</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Recent Income -->
+        <div class="transactions-section">
+            <h3 class="section-title">💰 Recent Income</h3>
+            <div class="table-container">
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Person</th>
+                            <th>Source</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for income in incomes %}
+                        <tr>
+                            <td>{{ income.date|date:"M d, Y" }}</td>
+                            <td>{{ income.person }}</td>
+                            <td>{{ income.source_name }}</td>
+                            <td>₹{{ income.amount|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #666;">No income for this month</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <a href="{% url 'account_analysis' %}" class="back-button">← Back to Analysis</a>
+    </div>
+</div>
+{% endblock %} 

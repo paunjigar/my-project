@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .income-container {
+        padding: 1rem;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    
+    .page-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .alert-message {
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        text-align: center;
+        font-weight: 600;
+        animation: slideInDown 0.5s ease-out;
+    }
+    
+    @keyframes slideInDown {
+        from { 
+            opacity: 0; 
+            transform: translateY(-20px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+    
+    .alert-error {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        color: white;
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    }
+    
+    .alert-success {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+    }
+    
+    .form-section {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        animation: fadeInUp 0.8s ease-out;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    @keyframes fadeInUp {
+        from { 
+            opacity: 0; 
+            transform: translateY(30px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+        padding: 0.875rem 1rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        font-family: inherit;
+    }
+    
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .submit-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+        display: block;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .field-icon {
+        font-size: 1.2rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .income-container {
+            padding: 0.5rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .submit-btn {
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .page-title {
+            font-size: 1.75rem;
+        }
+        
+        .form-section {
+            padding: 1rem;
+            border-radius: 12px;
+        }
+        
+        .submit-btn {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+        }
+    }
+</style>
+
+<div class="income-container">
+    <div class="page-header">
+        <h1 class="page-title">💰 Add Income</h1>
+        <p class="page-subtitle">Track your company income with detailed information</p>
+    </div>
+    
+    {% if error %}
+    <div class="alert-message alert-error">{{ error }}</div>
+    {% endif %}
+    
+    {% if success %}
+    <div class="alert-message alert-success">✅ Income added successfully!</div>
+    {% endif %}
+    
+    <div class="form-section">
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <!-- Source Name -->
+                <div class="form-group">
+                    <label for="source_name" class="form-label">
+                        <span class="field-icon">🏢</span>
+                        Source Name
+                    </label>
+                    <input type="text" id="source_name" name="source_name" class="form-input" placeholder="e.g., Client Payment, Investment" required>
+                </div>
+                
+                <!-- Person Name -->
+                <div class="form-group">
+                    <label for="person_name" class="form-label">
+                        <span class="field-icon">👤</span>
+                        Given By
+                    </label>
+                    <input type="text" id="person_name" name="person_name" class="form-input" placeholder="Enter person name" required>
+                </div>
+                
+                <!-- Amount -->
+                <div class="form-group">
+                    <label for="amount" class="form-label">
+                        <span class="field-icon">💰</span>
+                        Amount (₹)
+                    </label>
+                    <input type="number" id="amount" name="amount" class="form-input" min="0" step="0.01" placeholder="0.00" required>
+                </div>
+                
+                <!-- Category -->
+                <div class="form-group">
+                    <label for="category" class="form-label">
+                        <span class="field-icon">🏷️</span>
+                        Category
+                    </label>
+                    <input type="text" id="category" name="category" class="form-input" placeholder="e.g., Sales, Investment, Loan, Other">
+                </div>
+                
+                <!-- Date -->
+                <div class="form-group">
+                    <label for="date" class="form-label">
+                        <span class="field-icon">📅</span>
+                        Date
+                    </label>
+                    <input type="date" id="date" name="date" class="form-input" required>
+                </div>
+                
+                <!-- Payment Method -->
+                <div class="form-group">
+                    <label for="payment_method" class="form-label">
+                        <span class="field-icon">💳</span>
+                        Payment Method
+                    </label>
+                    <select class="form-select" id="payment_method" name="payment_method">
+                        <option value="bank_transfer" selected>Bank Transfer</option>
+                        <option value="cash">Cash</option>
+                        <option value="card">Credit/Debit Card</option>
+                        <option value="check">Check</option>
+                        <option value="digital_wallet">Digital Wallet</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <!-- Notes -->
+                <div class="form-group full-width">
+                    <label for="notes" class="form-label">
+                        <span class="field-icon">📝</span>
+                        Notes
+                    </label>
+                    <textarea id="notes" name="notes" class="form-textarea" placeholder="Enter additional notes or description about this income..."></textarea>
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">➕ Add Income</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Set default date to today
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

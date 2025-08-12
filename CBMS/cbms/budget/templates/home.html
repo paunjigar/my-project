@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .dashboard-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .dashboard-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        animation: slideInDown 0.8s ease-out;
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .welcome-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    /* Summary Cards */
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .card-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .income-icon {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+    }
+
+    .expense-icon {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+    }
+
+    .balance-icon {
+        background: linear-gradient(135deg, #2196F3, #1976D2);
+        color: white;
+    }
+
+    .people-icon {
+        background: linear-gradient(135deg, #FF9800, #F57C00);
+        color: white;
+    }
+
+    .card-title {
+        font-size: 0.9rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+    .card-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-change {
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .positive {
+        color: #4CAF50;
+    }
+
+    .negative {
+        color: #f44336;
+    }
+
+    /* Charts Section */
+    .charts-section {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .chart-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .chart-canvas {
+        width: 100%;
+        height: 300px;
+        position: relative;
+    }
+
+    /* Recent Transactions */
+    .transactions-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        animation: fadeInUp 1.2s ease-out;
+    }
+
+    .transactions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .transaction-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .transaction-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s ease;
+    }
+
+    .transaction-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .transaction-info {
+        flex: 1;
+    }
+
+    .transaction-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+
+    .transaction-date {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .transaction-amount {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .amount-income {
+        color: #4CAF50;
+    }
+
+    .amount-expense {
+        color: #f44336;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .charts-section {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+
+        .summary-cards {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .transactions-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+        }
+
+        .chart-container {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-header {
+            padding: 1.5rem;
+        }
+
+        .summary-card {
+            padding: 1.5rem;
+        }
+
+        .card-value {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1 class="welcome-title">📊 CBMS Dashboard</h1>
+        <p class="welcome-subtitle">Welcome back! Here's your financial overview for {{ current_month|date:"F Y" }}</p>
+    </div>
+
+    <div class="charts-section">
+        <!-- Income vs Expenses Trend Chart -->
+        <div class="chart-container">
+            <h3 class="chart-title">📈 Income vs Expenses Trend (Last 6 Months)</h3>
+            <div class="chart-canvas">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="card-header">
+                <div class="card-icon income-icon">💰</div>
+                <div class="card-title">This Month's Income</div>
+            </div>
+            <div class="card-value">₹{{ current_month_income|default:0|floatformat:2 }}</div>
+            <div class="card-change">
+                <span class="positive">↗</span>
+                <span>Monthly income</span>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="card-header">
+                <div class="card-icon expense-icon">💸</div>
+                <div class="card-title">This Month's Expenses</div>
+            </div>
+            <div class="card-value">₹{{ current_month_expense|default:0|floatformat:2 }}</div>
+            <div class="card-change">
+                <span class="negative">↘</span>
+                <span>Monthly expenses</span>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="card-header">
+                <div class="card-icon balance-icon">🏦</div>
+                <div class="card-title">Net Balance</div>
+            </div>
+            <div class="card-value {% if current_month_balance >= 0 %}positive{% else %}negative{% endif %}">
+                ₹{{ current_month_balance|default:0|floatformat:2 }}
+            </div>
+            <div class="card-change">
+                <span class="{% if current_month_balance|default:0 >= 0 %}positive{% else %}negative{% endif %}">
+                    {% if current_month_balance|default:0 >= 0 %}↗{% else %}↘{% endif %}
+                </span>
+                <span>This month</span>
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <div class="card-header">
+                <div class="card-icon people-icon">👥</div>
+                <div class="card-title">Total People</div>
+            </div>
+            <div class="card-value">{{ total_people|default:0 }}</div>
+            <div class="card-change">
+                <span class="positive">↗</span>
+                <span>Team members</span>
+            </div>
+        </div>
+
+        <!-- Total Balance Card (All Time) -->
+        <div class="summary-card">
+            <div class="card-header">
+                <div class="card-icon balance-icon">💼</div>
+                <div class="card-title">Total Balance (All Time)</div>
+            </div>
+            <div class="card-value {% if company_balance >= 0 %}positive{% else %}negative{% endif %}">
+                ₹{{ company_balance|floatformat:2 }}
+            </div>
+            <div class="card-change">
+                <span class="{% if company_balance >= 0 %}positive{% else %}negative{% endif %}">
+                    {% if company_balance >= 0 %}↗{% else %}↘{% endif %}
+                </span>
+                <span>All time</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    
+
+    <!-- Recent Transactions -->
+    <div class="transactions-section">
+        <h3 class="chart-title">🕒 Recent Transactions</h3>
+        <div class="transactions-grid">
+            <!-- Recent Expenses -->
+            </div>
+                <h4 style="margin-bottom: 1rem; color: #f44336;">Recent Expenses</h4>
+            <!-- Total Balance Card (All Time) -->
+            <div class="summary-cards" style="margin-bottom: 2rem;">
+                <div class="summary-card">
+                    <div class="card-header">
+                        <div class="card-icon balance-icon">💼</div>
+                        <div class="card-title">Total Balance (All Time)</div>
+                    </div>
+                    <div class="card-value {% if company_balance >= 0 %}positive{% else %}negative{% endif %}">
+                        ₹{{ company_balance|floatformat:2 }}
+                    </div>
+                    <div class="card-change">
+                        <span class="{% if company_balance >= 0 %}positive{% else %}negative{% endif %}">
+                            {% if company_balance >= 0 %}↗{% else %}↘{% endif %}
+                        </span>
+                        <span>All time</span>
+                    </div>
+                </div>
+            </div>
+                <div class="transaction-list">
+                    {% for expense in recent_expenses %}
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div class="transaction-title">
+                                <a href="{% url 'expense_detail' expense.id %}" style="color: inherit; text-decoration: none;">
+                                    {{ expense.person.name }} - {{ expense.vendor|default:"No vendor" }}
+                                </a>
+                            </div>
+                            <div class="transaction-date">
+                                {{ expense.date|date:"M d, Y" }} • 
+                                {% if expense.category in "marketing,salaries,utilities,rent,equipment,travel,food,other" %}
+                                    {{ expense.get_category_display }}
+                                {% else %}
+                                    {{ expense.category|title }}
+                                {% endif %} • 
+                                {% if expense.payment_method in "cash,card,bank_transfer,check,digital_wallet,other" %}
+                                    {{ expense.get_payment_method_display }}
+                                {% else %}
+                                    {{ expense.payment_method|title }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="transaction-amount amount-expense">-₹{{ expense.amount|floatformat:2 }}</div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; color: #666; padding: 2rem;">No recent expenses</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Recent Income -->
+            <div>
+                <h4 style="margin-bottom: 1rem; color: #4CAF50;">Recent Income</h4>
+                <div class="transaction-list">
+                    {% for income in recent_incomes %}
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div class="transaction-title">{{ income.person }} - {{ income.source_name }}</div>
+                            <div class="transaction-date">
+                                {{ income.date|date:"M d, Y" }} • 
+                                {{ income.category|default:"No category" }} • 
+                                {% if income.payment_method in "cash,card,bank_transfer,check,digital_wallet,other" %}
+                                    {{ income.get_payment_method_display }}
+                                {% else %}
+                                    {{ income.payment_method|title }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="transaction-amount amount-income">+₹{{ income.amount|floatformat:2 }}</div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; color: #666; padding: 2rem;">No recent income</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Parse the data from Django context
+    const monthsData = JSON.parse('{{ months_data|escapejs }}');
+
+    // Colors for charts
+    const colors = {
+        income: '#4CAF50',
+        expense: '#f44336',
+        balance: '#2196F3'
+    };
+
+    // Trend Chart (Income vs Expenses)
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: monthsData.map(item => item.month),
+            datasets: [
+                {
+                    label: 'Income',
+                    data: monthsData.map(item => item.income),
+                    borderColor: colors.income,
+                    backgroundColor: colors.income + '20',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: 'Expenses',
+                    data: monthsData.map(item => item.expense),
+                    borderColor: colors.expense,
+                    backgroundColor: colors.expense + '20',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+
+</script>
+{% endblock %}
